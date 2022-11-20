@@ -1,0 +1,28 @@
+{
+  "name": "fundsbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kn9ka/fundsbot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kn9ka/fundsbot/issues"
+  },
+  "homepage": "https://github.com/kn9ka/fundsbot#readme",
+  "devDependencies": {
+    "@types/node-telegram-bot-api": "^0.57.6"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "node-telegram-bot-api": "^0.60.0",
+    "prettier": "^2.7.1"
+  }
+}
