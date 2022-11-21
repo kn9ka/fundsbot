@@ -1,13 +1,21 @@
 const fs = require('fs');
 const path = require('path');
 const TelegramBot = require('node-telegram-bot-api');
-
+const format = require('date-fns/format');
+const ruLocale = require('date-fns/locale/ru');
 require('dotenv').config();
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 const EXPENSES_DIR = './expenses';
 const EXPENSES_FILENAME = 'expenses.json';
 const FULL_PATH = path.resolve(EXPENSES_DIR, EXPENSES_FILENAME);
+
+const checkIsGroup = (msg) => msg.chat.type === 'group';
+
+const sendToMain = (text, options) => {
+  const MAIN_CHANNEL_ID = '-796889453';
+  bot.sendMessage(MAIN_CHANNEL_ID, text, options);
+};
 
 if (!fs.existsSync(EXPENSES_DIR)) {
   fs.mkdirSync(EXPENSES_DIR);
@@ -78,34 +86,56 @@ bot.onText(/\/list/, (msg) => {
   const chatId = msg.chat.id;
   const userName = msg.chat.username;
 
+  if (checkIsGroup(msg)) {
+    return;
+  }
+
   try {
     const rowdata = fs.readFileSync(FULL_PATH, 'utf8');
     const parsed = rowdata ? JSON.parse(rowdata) : {};
-    let sum = 0;
 
-    const rows = Object.keys(parsed)
+    let debtByDay = {};
+
+    Object.values(parsed)
       .filter(
-        (msgId) => parsed[msgId].userName === userName && parsed[msgId].isActive
+        ({ userName: savedUserName, isActive }) =>
+          savedUserName === userName && isActive
       )
-      .map((msgId) => {
-        const entity = parsed[msgId];
+      .sort((a, b) => b.date - a.date)
+      .forEach((entity) => {
         const { amount, place, reason, date } = entity || {};
-        sum += amount;
 
-        let text = `потратил: ${amount}`;
-        if (reason) text += `, на: ${reason}`;
-        if (place) text += `, в: ${place}`;
-        if (date) {
-          let formattedDate = new Date(date * 1000).toLocaleDateString();
-          text += `, когда: ${formattedDate}`;
-        }
+        const formattedDate = new Date(date * 1000);
+        const key = format(formattedDate, 'd.M.yyyy', { locale: ruLocale });
+        const time = format(formattedDate, 'HH:mm', { locale: ruLocale });
+
+        let text = '';
+        text += `${amount}`;
+        if (reason) text += `, купил: ${reason}`;
+        if (place) text += `, место покупки: ${place}`;
+
+        debtByDay[key] = [...(debtByDay[key] || []), { time, text, amount }];
         return text;
       });
 
-    const message = `
-      *Общая сумма:* ${sum}\n\n${rows.join('\n')}
-    `;
-    bot.sendMessage(chatId, message, { parse_mode: 'MarkdownV2' });
+    let totals = {};
+    Object.keys(debtByDay).forEach((key) => {
+      let sum = debtByDay[key].reduce((acc, curr) => {
+        acc += curr.amount;
+        return acc;
+      }, 0);
+      totals[key] = sum;
+    });
+
+    let message = '';
+    Object.keys(debtByDay).forEach((key) => {
+      message += `\n<b>${key}: ${totals[key]}</b> \n \n`;
+      debtByDay[key].forEach(({ time, text }) => {
+        message += `${time}: ${text}\n`;
+      });
+    });
+
+    bot.sendMessage(chatId, message, { parse_mode: 'HTML' });
   } catch (err) {
     bot.sendMessage(chatId, `Ничего не нашлось: ${err}`);
   }
@@ -113,7 +143,7 @@ bot.onText(/\/list/, (msg) => {
 
 // Listen for any kind of message. There are different kinds of
 // messages.
-bot.on('message', (msg) => {
+bot.onText(/^(\d+)/gm, (msg) => {
   const chatId = msg.chat.id;
   const msgId = msg.message_id;
   const text = msg.text.split(' ');
@@ -147,9 +177,28 @@ bot.on('message', (msg) => {
         throw err;
       } finally {
         bot.sendMessage(chatId, `*сохранил*`, { parse_mode: 'MarkdownV2' });
+
+        let msg = `@${userName} добавил чек на сумму ${amount}`;
+        if (reason) msg += ` на ${reason}`;
+        sendToMain(msg);
       }
     });
-  } else {
-    // bot.sendMessage(chatId, 'получил сообщение, но не знаю что ним делать')
+  }
+});
+
+bot.on('message', (msg) => {
+  const chatId = msg.chat.id;
+  const text = msg.text;
+  const reg = new RegExp(/^(\d+)/, 'gm');
+  const isCommand = Object.values(commandQuery).includes(text);
+  const isData = reg.test(text);
+
+  if (!isCommand && !isData && !checkIsGroup(msg)) {
+    bot.sendMessage(
+      chatId,
+      'не разобрался, что ты пишешь. попробуй написать /start \n' +
+        'шаблон сообщения: [СУММА] [ЦЕЛЬ] [ГДЕ КУПИЛ]\n\n' +
+        'пример сообщения: 1000000 машина/продукты марс'
+    );
   }
 });
