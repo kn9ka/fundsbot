@@ -127,7 +127,10 @@ bot.onText(/\/list/, (msg) => {
       totals[key] = sum;
     });
 
-    let message = '';
+    const total = Object.keys(totals).reduce((acc, curr) => {
+      return (acc += totals[curr]);
+    }, 0);
+    let message = `<b>Общая сумма:</b> ${total}\n`;
     Object.keys(debtByDay).forEach((key) => {
       message += `\n<b>${key}: ${totals[key]}</b> \n \n`;
       debtByDay[key].forEach(({ time, text }) => {
