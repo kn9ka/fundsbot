@@ -5,12 +5,15 @@ const { createDebtsMsgByUser } = require('./utils');
 
 require('dotenv').config();
 
+const MAIN_CHANNEL_ID = '-1001763536285';
+// const MAIN_CHANNEL_ID = '-796889453';
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 
-const checkIsGroup = (msg) => msg.chat.type === 'group';
+const checkIsGroup = (msg) => {
+  return msg.chat.id === +MAIN_CHANNEL_ID || msg.chat.type === 'group';
+};
 
 const sendToMain = (text, options) => {
-  const MAIN_CHANNEL_ID = '-1001763536285';
   bot.sendMessage(MAIN_CHANNEL_ID, text, options);
 };
 
