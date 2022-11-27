@@ -8,7 +8,7 @@ const createDebtsMsgByUser = (rows, options = { withUserName: false }) => {
   rows
     .filter(([, , , , , isActive]) => Boolean(isActive))
     .forEach((row) => {
-      const [msgId, amount, place, reason, date, userName, isActive] = row;
+      const [msgId, amount, reason, place, date, userName, isActive] = row;
 
       const formattedDate = new Date(date * 1000);
       const key = format(formattedDate, 'd.M.yyyy', { locale: ruLocale });
