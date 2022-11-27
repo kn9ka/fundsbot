@@ -10,7 +10,7 @@ const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 const checkIsGroup = (msg) => msg.chat.type === 'group';
 
 const sendToMain = (text, options) => {
-  const MAIN_CHANNEL_ID = '-796889453';
+  const MAIN_CHANNEL_ID = '-1001763536285';
   bot.sendMessage(MAIN_CHANNEL_ID, text, options);
 };
 

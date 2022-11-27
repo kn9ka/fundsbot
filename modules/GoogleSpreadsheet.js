@@ -76,13 +76,14 @@ class GoogleSpreadsheet {
       });
 
       const rows = response.data.values;
-      const updated = rows
-        .filter(([, , , , , rowUserName]) => userName === rowUserName)
-        .map((row) => {
-          const [msgId, amount, reason, place, msgDate, userName, isActive] =
-            row;
+      const updated = rows.map((row) => {
+        const [msgId, amount, reason, place, msgDate, rowUserName, isActive] =
+          row;
+        if (rowUserName === userName) {
           return [msgId, amount, reason, place, msgDate, userName, 'FALSE'];
-        });
+        }
+        return row;
+      });
 
       return await this.sheets.spreadsheets.values.batchUpdate({
         spreadsheetId: BASE_SPREADSHEET_ID,
