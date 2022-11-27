@@ -126,7 +126,7 @@ bot.onText(/^(\d+)/gm, (msg) => {
       bot.sendMessage(chatId, `*сохранил*`, { parse_mode: 'MarkdownV2' });
       let msg = `@${userName} добавил чек на сумму ${amount}`;
       if (reason) msg += ` на ${reason}`;
-      sendToMain(msg);
+      sendToMain(msg, { disable_notification: true });
     })
     .catch((err) => {
       bot.sendMessage(chatId, 'возникла ошибка при сохранении: ', err);
