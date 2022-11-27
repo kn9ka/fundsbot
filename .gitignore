@@ -49,6 +49,7 @@ Thumbs.db
 
 # envs
 .env
+serviceAccount.json
 
 # expenses
 *expenses
