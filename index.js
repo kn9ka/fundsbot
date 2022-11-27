@@ -73,7 +73,7 @@ bot.onText(/\/list/, (msg) => {
 
   if (checkIsGroup(msg)) {
     GoogleSpreadsheet.getDataByUser().then((rows) => {
-      const activeRows = rows.filter((row) => {
+      const activeRows = (rows || []).filter((row) => {
         const [msgId, amount, reason, place, date, userName, isActive] = row;
         return isActive === 'TRUE';
       });
@@ -88,7 +88,7 @@ bot.onText(/\/list/, (msg) => {
   try {
     GoogleSpreadsheet.getDataByUser(userName)
       .then((rows) => {
-        const activeRows = rows.filter((row) => {
+        const activeRows = (rows || []).filter((row) => {
           const [msgId, amount, reason, place, date, userName, isActive] = row;
           return isActive === 'TRUE';
         });

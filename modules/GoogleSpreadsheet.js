@@ -58,7 +58,9 @@ class GoogleSpreadsheet {
       if (!userName) {
         return rows;
       }
-      return rows.filter(([, , , , , rowUserName]) => userName === rowUserName);
+      return (rows || []).filter(
+        ([, , , , , rowUserName]) => userName === rowUserName
+      );
     } catch (err) {
       throw err;
     }
@@ -76,7 +78,7 @@ class GoogleSpreadsheet {
       });
 
       const rows = response.data.values;
-      const updated = rows.map((row) => {
+      const updated = (rows || []).map((row) => {
         const [msgId, amount, reason, place, msgDate, rowUserName, isActive] =
           row;
         if (rowUserName === userName) {
