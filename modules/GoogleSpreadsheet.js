@@ -111,7 +111,7 @@ class GoogleSpreadsheet {
         spreadsheetId: BASE_SPREADSHEET_ID,
         range: `${BASE_SPREADSHEET_TAB_ID}!A1`,
         insertDataOption: 'INSERT_ROWS',
-        valueInputOption: 'USER_ENTERED',
+        valueInputOption: 'RAW',
         requestBody: {
           values: [[...data]],
         },

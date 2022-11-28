@@ -120,7 +120,6 @@ bot.onText(/^(\d+)/gm, (msg) => {
   const place = text.slice(2, text.length).join(' ');
 
   const newRow = [msgId, amount, reason, place, msgDate, userName, 'TRUE'];
-
   GoogleSpreadsheet.writeRow(newRow)
     .then((response) => {
       bot.sendMessage(chatId, `*сохранил*`, { parse_mode: 'MarkdownV2' });

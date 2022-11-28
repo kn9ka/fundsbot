@@ -11,24 +11,26 @@ const createDebtsMsgByUser = (rows, options = { withUserName: false }) => {
       const [msgId, amount, reason, place, date, userName, isActive] = row;
 
       const formattedDate = new Date(date * 1000);
+      const formattedAmount = Number(amount.replace(',', '.'));
+
       const key = format(formattedDate, 'd.M.yyyy', { locale: ruLocale });
       const time = format(formattedDate, 'HH:mm', { locale: ruLocale });
 
       let text = '';
-      text += `${amount}`;
+      text += `${formattedAmount}`;
       if (reason) text += `, купил: ${reason}`;
       if (place) text += `, место покупки: ${place}`;
       if (options?.withUserName) text += ` (@${userName})`;
 
       debtByDay[key] = [
         ...(debtByDay[key] || []),
-        { time, text, amount: +amount },
+        { time, text, amount: formattedAmount },
       ];
     });
 
   Object.keys(debtByDay).forEach((key) => {
     let sum = debtByDay[key].reduce((acc, curr) => {
-      acc += curr.amount;
+      acc += Number(curr.amount);
       return acc;
     }, 0);
     totals[key] = sum;
@@ -38,7 +40,7 @@ const createDebtsMsgByUser = (rows, options = { withUserName: false }) => {
     return (acc += totals[curr]);
   }, 0);
 
-  let message = `<b>Общая сумма:</b> ${total}\n`;
+  let message = `<b>Общая сумма:</b> ${(Number(total) || 0).toFixed(2)}\n`;
   Object.keys(debtByDay).forEach((key) => {
     message += `\n<b>${key}: ${totals[key]}</b> \n \n`;
     debtByDay[key].forEach(({ time, text }) => {
