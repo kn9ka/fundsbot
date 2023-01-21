@@ -1,4 +1,4 @@
-FROM node:16.14.0-buster-slim as build
+FROM node:18.13.0-buster-slim as build
 
 ## подменяем баш на sh, чтобы верно определять енвы в проектах
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh

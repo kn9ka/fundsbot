@@ -1,4 +1,3 @@
-const fetch = require('node-fetch');
 const CurrencyEnum = require('../enums').CurrencyEnum;
 
 const Currency = {
