@@ -1,3 +1,4 @@
+const fetch = require('node-fetch');
 const CurrencyEnum = require('../enums').CurrencyEnum;
 
 const API_URL = 'https://koronapay.com/transfers/online/api/transfers/tariffs';
