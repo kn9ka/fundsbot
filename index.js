@@ -1,12 +1,16 @@
 const TelegramBot = require('node-telegram-bot-api');
 
-const GoogleSpreadsheet = require('./modules/GoogleSpreadsheet');
-const { createDebtsMsgByUser } = require('./utils');
+const GoogleSpreadsheet = require('./src/modules/google');
+const { fetchExchangeRates } = require('./src/modules/currencies');
+const {
+  createDebtsMsgByUser,
+  createExchangeRateMsgByCurrency,
+} = require('./src/utils');
 
 require('dotenv').config();
 
-const MAIN_CHANNEL_ID = '-1001763536285';
-// const MAIN_CHANNEL_ID = '-796889453';
+const MAIN_CHANNEL_ID = process.env.MAIN_CHAT_ID;
+console.log(MAIN_CHANNEL_ID);
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 
 const checkIsGroup = (msg) => {
@@ -14,24 +18,27 @@ const checkIsGroup = (msg) => {
 };
 
 const sendToMain = (text, options) => {
-  bot.sendMessage(MAIN_CHANNEL_ID, text, options);
+  bot.sendMessage(+MAIN_CHANNEL_ID, text, options);
 };
 
 const commands = {
   START: 'START',
   PAID_LIST: 'PAID_LIST',
+  CURRENCY_RATES: 'CURRENCY_RATES',
   CLEAR: 'CLEAR',
 };
 
 const commandQuery = {
   [commands.START]: '/start',
   [commands.PAID_LIST]: '/list',
+  [commands.CURRENCY_RATES]: '/rates',
   [commands.CLEAR]: '/clear',
 };
 
 const descriptions = {
   [commands.START]: 'Начало',
   [commands.PAID_LIST]: 'Мои траты',
+  [commands.CURRENCY_RATES]: 'Курсы валют в системах перевода',
   [commands.CLEAR]: 'Очистить траты',
 };
 
@@ -68,6 +75,21 @@ bot.onText(/\/clear/, (msg) => {
   GoogleSpreadsheet.deactivateDebtByUser(userName)
     .then(() => bot.sendMessage(chatId, `Очистили записи`))
     .catch((err) => bot.sendMessage(chatId, `Неудалось очистить: ${err}`));
+});
+
+bot.onText(/\/rates/, (msg) => {
+  const chatId = msg.chat.id;
+
+  bot.sendChatAction(chatId, 'typing');
+  fetchExchangeRates()
+    .then((rates) => {
+      bot.sendMessage(chatId, createExchangeRateMsgByCurrency(rates), {
+        parse_mode: 'HTML',
+      });
+    })
+    .catch((e) =>
+      bot.sendMessage(chatId, `Возникла непредвиденная ошибка: ${e}`)
+    );
 });
 
 bot.onText(/\/list/, (msg) => {

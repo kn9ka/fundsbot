@@ -50,6 +50,29 @@ const createDebtsMsgByUser = (rows, options = { withUserName: false }) => {
 
   return message;
 };
+
+const createExchangeRateMsgByCurrency = (json) => {
+  /**
+   * {
+      USD: { unistream: '70.23280', corona: '70.18960' },
+      GEL: { unistream: '26.59898', corona: '26.56800' },
+      EUR: { unistream: '76.20360', corona: '76.20470' }
+    }
+   */
+
+  let message = '';
+
+  Object.entries(json).map(([currencyCode, ratesByExchange]) => {
+    message += `<b>[${currencyCode}]</b> \n`;
+    Object.entries(ratesByExchange).map(([exchangeName, rate]) => {
+      message += `    ${exchangeName}: ${rate} \n`;
+    });
+    message += '\n';
+  });
+  return message;
+};
+
 module.exports = {
   createDebtsMsgByUser,
+  createExchangeRateMsgByCurrency,
 };
