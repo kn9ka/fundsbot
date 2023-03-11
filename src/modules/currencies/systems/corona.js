@@ -25,7 +25,7 @@ const fetchExchangeRate = async (params) => {
 
   const request = {
     headers: {
-      accept: 'application/vnd.cft-data.v2.96+json',
+      accept: 'application/vnd.cft-data.v2.99+json',
       'accept-language': 'en',
       'sec-ch-ua':
         '"Not_A Brand";v="99", "Google Chrome";v="109", "Chromium";v="109"',
